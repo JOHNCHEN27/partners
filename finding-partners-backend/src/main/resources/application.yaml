@@ -1,0 +1,43 @@
+#配置文件加载相同的配置会被优先级高的配置文件的内容覆盖
+spring:
+  application:
+    name: finding-partners-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/finding_partner
+    password: root
+    username: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  session: #session 一天失效
+    timeout: 86400
+  redis:
+    host: localhost
+    port: 6379
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: 100ms
+        min-idle: 0
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+mybatis-plus:
+  configuration:
+    #数据库属性和实体属性名称一致 不需要开启自动驼峰命名转化
+    map-underscore-to-camel-case: false
+    #输出数据库操作日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete #逻辑删除对于的实体字段名
+      logic-delete-value: 1 #逻辑已删除值
+      logic-not-delete-value: 0 #逻辑未删除值
+#minio配置
+minio:
+  endpoint: http://47.113.185.5:9000
+  accessKey: ! '@lncminio007'     #如果自定义属性中包含特殊字符，需要用 ！'属性值' 包含起来
+  secretKey: ! '@lncminio007'
+  bucket:
+    files: mediafiles
+    videofiles: video
