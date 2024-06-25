@@ -29,6 +29,7 @@ import org.springframework.util.DigestUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.Option;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -366,6 +367,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             //利用gson 将字符串转化为json对象
             Set<String> tagsNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>(){}.getType());
+            //Optional.ofNullable 判断对象是否为空， 如果为空，给一个默认值
+            tagsNameSet = Optional.ofNullable(tagsNameSet).orElse(new HashSet<>());
             //反序列化
             //gson.toJson(tagsNameList);
             for (String tagName : tagNameList){

@@ -11,35 +11,47 @@
   </van-nav-bar>
 
    <div id="content">
-     <template v-if="active === 'index' ">
-       <Index/>
-     </template>
-     <template v-if="active === 'team' ">
-       <Team/>
-     </template>
+<!--     <template v-if="active === 'index' ">-->
+<!--       <Index/>-->
+<!--     </template>-->
+<!--     <template v-if="active === 'team' ">-->
+<!--       <Team/>-->
+<!--     </template>-->
+<!--     <template v-if="active === 'user' ">-->
+<!--       <User/>-->
+<!--     </template>-->
+<!--     <template v-if="active === 'search' ">-->
+<!--       <Search/>-->
+<!--     </template>-->
+
+     <router-view/>
    </div>
 
 
 
-  <van-tabbar v-model="active" @change="onChange">
-    <van-tabbar-item icon="home-o"  name="index">主页</van-tabbar-item>
-    <van-tabbar-item icon="search"  name="team">队伍</van-tabbar-item>
-    <van-tabbar-item icon="friends-o" name="user">个人</van-tabbar-item>
+  <van-tabbar route @change="onChange">
+    <van-tabbar-item to='/' icon="home-o"  name="index">主页</van-tabbar-item>
+    <van-tabbar-item to='/team' icon="search"  name="team">队伍</van-tabbar-item>
+    <van-tabbar-item to='/user' icon="friends-o" name="user">个人</van-tabbar-item>
   </van-tabbar>
 
 </template>
 
-<script setup>
-import {ref} from "vue"
+<script setup lang="ts">
 import {showToast} from "vant";
-import Index from "../pages/Index.vue";
-import Team from "../pages/Team.vue";
+import {useRouter} from "vue-router";
 
-const onClickLeft = () => history.back();
-const onClickRight = () => alert("按钮");
+const router = useRouter()
 
-const active = ref('index');
-const onChange = (index) => showToast(`标签 ${index}`);
+const onClickLeft = () => {
+  router.back();
+};
+const onClickRight = () => {
+  router.push('/search')
+};
+
+//const active = ref('index');
+const onChange = (index) => showToast(` ${index}`);
 
 </script>
 

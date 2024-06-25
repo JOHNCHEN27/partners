@@ -36,7 +36,11 @@ public class MvcConfig implements WebMvcConfigurer {
                                      "/user/login",
                                      "/user/logout",
                                      "/user/current",
-                        "/files/*"
+                        "/user/search/*",
+                        "/files/*",
+                        //拦截器不拦截swagger对应的资源，放行
+                        "/swagger-ui.html",
+                        "/swagger-ui/**", "/swagger-resources/**", "/v2/api-docs", "/webjars/**"
                                     ).order(1);
         //order指定哪个拦截器先执行， order权值越大执行顺序越低
         //拦截所有请求 Token刷新拦截器

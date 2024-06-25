@@ -3,12 +3,14 @@ package com.lncanswer.findingpartnersbackend.controller;
 import com.lncanswer.findingpartnersbackend.common.BaseResponse;
 import com.lncanswer.findingpartnersbackend.common.ErrorCode;
 import com.lncanswer.findingpartnersbackend.common.ResultUtils;
+import com.lncanswer.findingpartnersbackend.exception.BusinessException;
 import com.lncanswer.findingpartnersbackend.model.domain.User;
 import com.lncanswer.findingpartnersbackend.model.domain.request.UserLoginRequest;
 import com.lncanswer.findingpartnersbackend.model.domain.request.UserRegisterRequest;
 import com.lncanswer.findingpartnersbackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -107,6 +109,20 @@ public class UserController {
     public BaseResponse<List<User>> searchUsers(String username,HttpServletRequest request){
         System.out.println("username = " + username);
         List<User> userList = userService.queryUserList(username, request);
+        return ResultUtils.success(userList);
+    }
+
+    /**
+     * 根据标签列表查询用户列表返回
+     * @param tagNameList 标签列表
+     * @return 用户列表
+     */
+    @GetMapping("/search/tags")
+    public BaseResponse<List<User>> searchUserByTags(@RequestParam(required = false) List<String> tagNameList){
+        if (CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<User> userList = userService.searchUsersByTags(tagNameList);
         return ResultUtils.success(userList);
     }
 

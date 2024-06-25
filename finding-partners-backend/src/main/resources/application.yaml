@@ -2,6 +2,8 @@
 spring:
   application:
     name: finding-partners-backend
+  profiles:
+    active: dev  #默认环境为dev开发环境
   datasource:
     url: jdbc:mysql://localhost:3306/finding_partner
     password: root
@@ -18,10 +20,15 @@ spring:
         max-idle: 8
         max-wait: 100ms
         min-idle: 0
+   #mvc配置 - springboot和swagger不兼容问题
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
 server:
   port: 8080
   servlet:
     context-path: /api
+
 mybatis-plus:
   configuration:
     #数据库属性和实体属性名称一致 不需要开启自动驼峰命名转化
@@ -41,3 +48,40 @@ minio:
   bucket:
     files: mediafiles
     videofiles: video
+
+
+#knife4j:
+#  enable: true
+#  openapi:
+#    title: Knife4j官方文档
+#    description: "`我是测试`,**你知道吗**
+#    # aaa"
+#    email: xiaoymin@foxmail.com
+#    concat: 八一菜刀
+#    url: https://docs.xiaominfo.com
+#    version: v4.0
+#    license: Apache 2.0
+#    license-url: https://stackoverflow.com/
+#    terms-of-service-url: https://stackoverflow.com/
+#    group:
+#      test1:
+#        group-name: 分组名称
+#        api-rule: package
+#        api-rule-resources:
+#          - com.knife4j.demo.new3
+
+
+# application.yml
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /api-docs   #接口json文档
+swagger:
+   enable: true   #是否开启swagger
+   basic:
+    enable: false  #是否开启登录认证
+#    username: admin
+#    password: admin
+
+
