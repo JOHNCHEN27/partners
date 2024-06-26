@@ -21,10 +21,11 @@ public class CorsConfig implements WebMvcConfigurer {
        registry.addMapping("/**")
                //允许发送cookie
                .allowCredentials(true)
+               .allowedHeaders("*")  // 允许所有请求头
                //设置允许跨域请求的域名
                //当** Credentials为true时，Origin不能为星号，需要为具体的ip地址
                .allowedOrigins("http://47.113.185.5:8080","http://localhost:8000","http://localhost:8080",
-                       "http://localhost:5173")
+                       "http://localhost:5173","http://127.0.0.1:5173")
                //允许跨域的方法
                .allowedMethods("*")
                //跨域允许时间

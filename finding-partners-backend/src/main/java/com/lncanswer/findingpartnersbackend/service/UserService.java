@@ -2,6 +2,7 @@ package com.lncanswer.findingpartnersbackend.service;
 
 import com.lncanswer.findingpartnersbackend.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lncanswer.findingpartnersbackend.model.domain.dto.UserDTO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,4 +69,18 @@ public interface UserService extends IService<User> {
      * @return
      */
     List<User> searchUsersByTags(List<String> tagNameList);
+
+    /**
+     * 更新用户信息
+     * @param userDTO userDto
+     * @return 返回 Boolean
+     */
+    Boolean updateUser(UserDTO userDTO,HttpServletRequest request);
+
+    /**
+     * 获取推荐用户
+     * @param request httprequest
+     * @return List<User>
+     */
+    List<User> getRecommendUsers(HttpServletRequest request);
 }

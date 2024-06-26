@@ -30,4 +30,21 @@ public class UserDTO {
      * 0 - 用户  1 - 管理员
      */
     private Integer userRole;
+
+    /**
+     * 性别
+     */
+    private Integer gender;
+
+
+    /**
+     * 电话
+     */
+    private String phone;
+
+    /**
+     * 邮箱
+     */
+    private String email;
+
 }

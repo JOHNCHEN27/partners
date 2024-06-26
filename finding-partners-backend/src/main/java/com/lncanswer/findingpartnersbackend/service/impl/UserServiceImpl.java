@@ -201,7 +201,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 CopyOptions.create()
                         .setIgnoreNullValue(true)
                         .setFieldValueEditor((filedName, filedValue) ->
-                                filedValue.toString()));
+                               filedValue != null  ? filedValue.toString() : ""));
         //存储到redis中 Key前缀加token组成完整的key
         stringRedisTemplate.opsForHash().putAll(LOGIN_USER_KEY+token,userMap);
         //设置过期时间
@@ -383,6 +383,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
+     * 更新用户信息
+     * @param userDTO userDto
+     * @return 返回Boolean
+     */
+    @Override
+    public Boolean updateUser(UserDTO userDTO,HttpServletRequest request) {
+        //仅管理员和自己可修改
+        //获取当前登录用户
+        User currentUser = getCurrentUser(request);
+        if (currentUser == null ){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+
+        if (Objects.equals(currentUser.getId(), userDTO.getId()) || currentUser.getUserRole() == 1){
+            //更新数据
+            User newUser = new User();
+            BeanUtil.copyProperties(userDTO,newUser);
+            boolean result = updateById(newUser);
+
+            return result;
+        } else {
+            throw new BusinessException("不允许修改其他用户信息",40110,"");
+        }
+
+    }
+
+    /**
+     * 获取推荐用户
+     * @param request httprequest
+     * @return List<User>
+     */
+    @Override
+    public List<User> getRecommendUsers(HttpServletRequest request) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        List<User> userList = list(queryWrapper);
+        List<User> list = userList.stream().map(this::safetyUser).collect(Collectors.toList());
+        return list;
+    }
+
+    /**
      * 用户脱敏
      * @param user 用户信息
      * @return 安全用户信息
@@ -396,7 +436,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setUsername(user.getUsername());
         safetyUser.setUserAccount(user.getUserAccount());
         safetyUser.setAvatarUrl(user.getAvatarUrl());
-        safetyUser.setGender(0);
+        safetyUser.setGender(user.getGender());
         safetyUser.setPlanetCode(user.getPlanetCode());
         safetyUser.setPhone(user.getPhone());
         safetyUser.setEmail(user.getEmail());

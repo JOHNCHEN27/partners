@@ -1,10 +1,12 @@
 package com.lncanswer.findingpartnersbackend.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lncanswer.findingpartnersbackend.common.BaseResponse;
 import com.lncanswer.findingpartnersbackend.common.ErrorCode;
 import com.lncanswer.findingpartnersbackend.common.ResultUtils;
 import com.lncanswer.findingpartnersbackend.exception.BusinessException;
 import com.lncanswer.findingpartnersbackend.model.domain.User;
+import com.lncanswer.findingpartnersbackend.model.domain.dto.UserDTO;
 import com.lncanswer.findingpartnersbackend.model.domain.request.UserLoginRequest;
 import com.lncanswer.findingpartnersbackend.model.domain.request.UserRegisterRequest;
 import com.lncanswer.findingpartnersbackend.service.UserService;
@@ -17,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author LNC
@@ -124,6 +127,39 @@ public class UserController {
         }
         List<User> userList = userService.searchUsersByTags(tagNameList);
         return ResultUtils.success(userList);
+    }
+
+
+    /**
+     * 获取推荐用户
+     * @param request HttpServletRequest
+     * @return  BaseResponse<List<User>>
+     */
+    @GetMapping("/recommend")
+    public BaseResponse<List<User>> recommendUsers(HttpServletRequest request){
+        List<User> recommendUsers = userService.getRecommendUsers(request);
+        return ResultUtils.success(recommendUsers);
+
+    }
+
+
+    /**
+     * 更新用户信息
+     * @param userDTO userDto
+     * @param request HttpServletRequest
+     * @return 统一响应对象 BaseResponse<Boolean>
+     */
+    @PostMapping("/update")
+    public BaseResponse<Boolean> updateUser(@RequestBody UserDTO userDTO,HttpServletRequest request){
+        //1、校验参数是否为空
+        if (userDTO == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        //2、校验权限  todo 如果用户没有传递新的值，则直接报错
+        //3、触发更新
+        Boolean isSuccess = userService.updateUser(userDTO, request);
+        return ResultUtils.success(isSuccess);
+
     }
 
 

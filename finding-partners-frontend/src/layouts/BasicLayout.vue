@@ -56,6 +56,8 @@ const onChange = (index) => showToast(` ${index}`);
 </script>
 
 <style scoped>
-
+#content {
+  padding-bottom: 50px;
+}
 
 </style>

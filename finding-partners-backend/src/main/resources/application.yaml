@@ -11,6 +11,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   session: #session 一天失效
     timeout: 86400
+    store-type: redis
   redis:
     host: localhost
     port: 6379
@@ -28,6 +29,12 @@ server:
   port: 8080
   servlet:
     context-path: /api
+    session:
+      cookie:
+        same-site: None
+        secure: true  #是否仅仅在https的链接下，才提交cookie
+        http-only: true  #是否允许js读取cookie
+        domain: localhost
 
 mybatis-plus:
   configuration:

@@ -20,7 +20,9 @@
 
 
 import {useRoute} from "vue-router";
-import {ref} from "vue";
+import { ref} from "vue";
+import myAxios from "../plugins/myAxios.ts";
+import {getCurrentUser} from "../services/user.ts";
 
 const route = useRoute();
 const editUser = ref({
@@ -29,9 +31,19 @@ const editUser = ref({
   currentValue: route.query.currentValue
 })
 
-const onSubmit = (values) => {
+
+
+const onSubmit = async () => {
+  const currentUser = await getCurrentUser();
+  if (!currentUser){
+    return;
+  }
   //todo: 将editKey、editName、currentValue提交到后台
-  console.log('onSubmit',values)
+  const res = await myAxios.post("/user/update",{
+    'id': currentUser.id,
+    [editUser.value.editKey as string]: editUser.value.currentValue,
+  })
+  console.log(res);
 }
 
 

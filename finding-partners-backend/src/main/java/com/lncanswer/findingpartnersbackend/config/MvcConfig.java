@@ -37,6 +37,8 @@ public class MvcConfig implements WebMvcConfigurer {
                                      "/user/logout",
                                      "/user/current",
                         "/user/search/*",
+                        "/user/update",
+                        "/user/recommend",
                         "/files/*",
                         //拦截器不拦截swagger对应的资源，放行
                         "/swagger-ui.html",
