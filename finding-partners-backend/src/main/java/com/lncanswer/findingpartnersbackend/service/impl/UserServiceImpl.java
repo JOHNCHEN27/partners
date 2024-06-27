@@ -1,4 +1,5 @@
 package com.lncanswer.findingpartnersbackend.service.impl;
+import java.sql.Time;
 import java.util.*;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -6,6 +7,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -21,7 +23,9 @@ import com.lncanswer.findingpartnersbackend.utils.RegexUtils;
 import com.lncanswer.findingpartnersbackend.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -33,7 +37,7 @@ import javax.swing.text.html.Option;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.lncanswer.findingpartnersbackend.constant.RedisConstant.LOGIN_USER_KEY;
+import static com.lncanswer.findingpartnersbackend.constant.RedisConstant.*;
 import static com.lncanswer.findingpartnersbackend.constant.UserConstant.ADMIN_ROLE;
 import static com.lncanswer.findingpartnersbackend.constant.UserConstant.SALT;
 
@@ -61,6 +65,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      *
@@ -415,11 +422,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @return List<User>
      */
     @Override
-    public List<User> getRecommendUsers(HttpServletRequest request) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        List<User> userList = list(queryWrapper);
-        List<User> list = userList.stream().map(this::safetyUser).collect(Collectors.toList());
-        return list;
+    public Page<User> getRecommendUsers(long pageSize,long pageNum,HttpServletRequest request) {
+        //获取当前登录用户
+        User currentUser = getCurrentUser(request);
+        if (currentUser == null){
+            //用户未登录，展示主页推荐内容，优先查询缓存
+            return getRecommend(pageSize, pageNum, PARTNERS_RECOMMEND_DEFAULT_KEY);
+        }
+        //用户已登录
+        //推荐key前缀 + 用户id 组成每个用户的主页推荐key
+        String redisKey  = PARTNERS_RECOMMEND_KEY + currentUser.getId();
+        return getRecommend(pageSize, pageNum, redisKey);
     }
 
     /**
@@ -444,6 +457,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setCreateTime(user.getCreateTime());
         safetyUser.setUserRole(user.getUserRole());
         return safetyUser;
+    }
+
+    /**
+     * 抽取查询推荐页面方法
+     * @param pageSize 分页大小
+     * @param pageNum 起始位置
+     * @param key redis存储的key
+     * @return Page<User></>
+     */
+    private Page<User> getRecommend(long pageSize,long pageNum,String key){
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        // 如果有缓存，直接读缓存
+        Page<User> userPage = (Page<User>) valueOperations.get(key);
+        if (userPage != null){
+            log.info("查询缓存: {}",userPage);
+            return userPage;
+        }
+        //无缓存查询数据库
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        //分页查询
+        userPage = page(new Page<>(pageNum, pageSize), queryWrapper);
+        if (userPage == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        log.info("查询数据库,userList ={}",userPage);
+        //写入缓存
+        try {
+            redisTemplate.opsForValue().set(key, userPage,PARTNERS_RECOMMEND_KEY_TTL,TimeUnit.MILLISECONDS);
+        } catch (Exception e){
+            log.error("Redis set key error",e);
+        }
+        return userPage;
     }
 }
 

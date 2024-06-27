@@ -25,17 +25,18 @@ const userList = ref([]);
 onMounted( async () => {
   const userListData = await myAxios.get("/user/recommend",{
     params: {
-      tagNameList: tags
+      pageSize: 8,
+      pageNum: 1,
     },
-    paramsSerializer: params => {
-      return qs.stringify(params,{indices:false})
-    }
+    // paramsSerializer: params => {
+    //   return qs.stringify(params,{indices:false})
+    // }
   })
       //响应成功
       .then(function (response) {
         console.log('/user/search/tags succeed',response);
         //showSuccessToast("请求成功")
-        return response?.data;
+        return response?.data?.records;
       })
       //响应失败
       .catch(function (error) {

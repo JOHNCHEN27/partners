@@ -1,6 +1,7 @@
 package com.lncanswer.findingpartnersbackend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lncanswer.findingpartnersbackend.common.BaseResponse;
 import com.lncanswer.findingpartnersbackend.common.ErrorCode;
 import com.lncanswer.findingpartnersbackend.common.ResultUtils;
@@ -136,8 +137,8 @@ public class UserController {
      * @return  BaseResponse<List<User>>
      */
     @GetMapping("/recommend")
-    public BaseResponse<List<User>> recommendUsers(HttpServletRequest request){
-        List<User> recommendUsers = userService.getRecommendUsers(request);
+    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum,HttpServletRequest request){
+        Page<User> recommendUsers = userService.getRecommendUsers(pageSize,pageNum,request);
         return ResultUtils.success(recommendUsers);
 
     }

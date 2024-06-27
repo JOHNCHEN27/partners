@@ -14,4 +14,16 @@ public interface RedisConstant {
     String LOGIN_USER_KEY ="userLoginToken:";
 
     Long LOGIN_USER_TTL = 36000L;
+
+    /**
+     * 用户推荐缓存key前缀
+     */
+    String PARTNERS_RECOMMEND_KEY = "partners:user:recommend:";
+
+    Long PARTNERS_RECOMMEND_KEY_TTL = 150000L;
+
+    /**
+     * 主页默认推荐内容key
+     */
+    String PARTNERS_RECOMMEND_DEFAULT_KEY = "partners:recommend:default:key";
 }

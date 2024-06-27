@@ -1,5 +1,6 @@
 package com.lncanswer.findingpartnersbackend.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lncanswer.findingpartnersbackend.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lncanswer.findingpartnersbackend.model.domain.dto.UserDTO;
@@ -82,5 +83,5 @@ public interface UserService extends IService<User> {
      * @param request httprequest
      * @return List<User>
      */
-    List<User> getRecommendUsers(HttpServletRequest request);
+    Page<User> getRecommendUsers(long pageSize, long pageNum,HttpServletRequest request);
 }
