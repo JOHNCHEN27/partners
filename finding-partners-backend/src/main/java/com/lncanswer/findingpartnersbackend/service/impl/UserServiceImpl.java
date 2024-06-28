@@ -331,7 +331,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @param request
      * @return true or false
      */
-    private boolean isAdmin(HttpServletRequest request){
+    public boolean isAdmin(HttpServletRequest request){
         //User user = (User)request.getSession().getAttribute(USER_LOGIN_STATE);
 
         //从UserHolder本地线程获取当前用户，判断是否为管理员

@@ -84,4 +84,11 @@ public interface UserService extends IService<User> {
      * @return List<User>
      */
     Page<User> getRecommendUsers(long pageSize, long pageNum,HttpServletRequest request);
+
+    /**
+     * 判断当前用户是否为管理员
+     * @param request httpRequest
+     * @return boolean
+     */
+    boolean isAdmin(HttpServletRequest request);
 }
