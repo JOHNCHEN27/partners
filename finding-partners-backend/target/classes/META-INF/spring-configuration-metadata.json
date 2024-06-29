@@ -1,0 +1,28 @@
+{
+  "groups": [
+    {
+      "name": "spring.redis",
+      "type": "com.lncanswer.findingpartnersbackend.config.RedissonConfig",
+      "sourceType": "com.lncanswer.findingpartnersbackend.config.RedissonConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "spring.redis.database",
+      "type": "java.lang.Integer",
+      "sourceType": "com.lncanswer.findingpartnersbackend.config.RedissonConfig",
+      "defaultValue": 0
+    },
+    {
+      "name": "spring.redis.host",
+      "type": "java.lang.String",
+      "sourceType": "com.lncanswer.findingpartnersbackend.config.RedissonConfig"
+    },
+    {
+      "name": "spring.redis.port",
+      "type": "java.lang.String",
+      "sourceType": "com.lncanswer.findingpartnersbackend.config.RedissonConfig"
+    }
+  ],
+  "hints": []
+}

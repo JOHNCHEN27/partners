@@ -8,6 +8,7 @@ import java.util.Date;
  * @author LNC
  * @version 1.0
  * @date 2024/6/28 17:59
+ * 更新队伍请求体
  */
 @Data
 public class TeamUpdateRequest {

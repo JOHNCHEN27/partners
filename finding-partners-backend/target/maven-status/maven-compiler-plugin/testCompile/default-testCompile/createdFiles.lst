@@ -1,0 +1,5 @@
+com\lncanswer\findingpartnersbackend\service\RedissonTest.class
+com\lncanswer\findingpartnersbackend\FindingPartnersBackendApplicationTests.class
+com\lncanswer\findingpartnersbackend\service\InsertUsersTest.class
+com\lncanswer\findingpartnersbackend\service\UserServiceTest.class
+com\lncanswer\findingpartnersbackend\service\impl\UserServiceImplTest.class

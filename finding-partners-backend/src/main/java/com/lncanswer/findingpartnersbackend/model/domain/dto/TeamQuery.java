@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import org.apache.commons.compress.archivers.zip.X0017_StrongEncryptionHeader;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author LNC
@@ -25,6 +26,12 @@ public class TeamQuery extends PageRequest {
      * id
      */
     private Long id;
+
+    /**
+     * id 列表
+     */
+    private List<Long> idList;
+
 
     /**
      * 搜索关键词（同时对队伍名称和描述进行搜索）

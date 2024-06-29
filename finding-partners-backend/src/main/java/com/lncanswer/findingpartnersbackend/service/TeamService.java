@@ -3,6 +3,8 @@ package com.lncanswer.findingpartnersbackend.service;
 import com.lncanswer.findingpartnersbackend.model.domain.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lncanswer.findingpartnersbackend.model.domain.dto.TeamQuery;
+import com.lncanswer.findingpartnersbackend.model.domain.request.TeamJoinRequest;
+import com.lncanswer.findingpartnersbackend.model.domain.request.TeamQuitRequest;
 import com.lncanswer.findingpartnersbackend.model.domain.request.TeamUpdateRequest;
 import com.lncanswer.findingpartnersbackend.model.domain.vo.TeamUserVO;
 
@@ -36,4 +38,34 @@ public interface TeamService extends IService<Team> {
      * @return boolean
      */
     boolean updateTeam(TeamUpdateRequest teamUpdateRequest, HttpServletRequest request);
+
+    /**
+     * 加入队伍
+     * @param teamJoinRequest  teamJoinRequest请求体
+     * @return boolean
+     */
+    boolean joinTeam(TeamJoinRequest teamJoinRequest);
+
+    /**
+     * 退出队伍
+     * @param teamQuitRequest  teamQuitRequest请求体
+     * @return boolean
+     */
+    boolean quitTeam(TeamQuitRequest teamQuitRequest);
+
+    /**
+     * 删除队伍
+     * @param teamId 队伍id
+     * @return boolean
+     */
+    boolean deleteTeam(long teamId);
+
+    /**
+     * 查询用户创建的队伍
+     * @param teamQuery
+     * @return
+     */
+    List<TeamUserVO> getMyCreateTeam(TeamQuery teamQuery);
+
+
 }

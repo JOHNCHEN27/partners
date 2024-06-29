@@ -1,8 +1,8 @@
-import {UserType} from "../models/user"
+import {UserType} from "../models/user";
 
 let currentUser: UserType;
 
-const setCurrentUserState = (user : UserType) => {
+const setCurrentUserState = (user: UserType) => {
     currentUser = user;
 }
 

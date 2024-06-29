@@ -9,6 +9,7 @@ import java.util.Date;
  * @author LNC
  * @version 1.0
  * @date 2024/6/28 13:22
+ * 添加队伍请求体
  */
 @Data
 public class TeamAddRequest {
