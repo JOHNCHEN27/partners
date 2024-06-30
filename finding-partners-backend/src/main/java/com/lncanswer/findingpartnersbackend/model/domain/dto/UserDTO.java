@@ -46,5 +46,9 @@ public class UserDTO {
      * 邮箱
      */
     private String email;
+    /**
+     * 标签
+     */
+    private String tags;
 
 }

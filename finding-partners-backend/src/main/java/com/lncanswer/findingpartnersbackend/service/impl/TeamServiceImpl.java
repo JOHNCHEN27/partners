@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lncanswer.findingpartnersbackend.common.ErrorCode;
+import com.lncanswer.findingpartnersbackend.constant.RedissonConstant;
 import com.lncanswer.findingpartnersbackend.exception.BusinessException;
 import com.lncanswer.findingpartnersbackend.model.domain.Team;
 import com.lncanswer.findingpartnersbackend.model.domain.User;
@@ -23,8 +24,11 @@ import com.lncanswer.findingpartnersbackend.service.UserService;
 import com.lncanswer.findingpartnersbackend.service.UserTeamService;
 import com.lncanswer.findingpartnersbackend.utils.UserHolder;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
 * @author JohnChen
@@ -47,6 +52,7 @@ import java.util.Optional;
 * @createDate 2024-06-28 10:35:54
 */
 @Service
+@Slf4j
 public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     implements TeamService{
 
@@ -54,6 +60,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     private UserService userService;
     @Resource
     private UserTeamService userTeamService;
+    @Resource
+    private RedissonClient redissonClient;
 
     /**
      * 添加队伍
@@ -298,26 +306,42 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         Long userId = user.getId();
+        //只有一个线程获取锁
+        RLock lock = redissonClient.getLock(RedissonConstant.JOIN_TEAM_LOCK);
+        try {
+            while (true){
+            //抢到锁并执行
+            if (lock.tryLock(0,-1, TimeUnit.MILLISECONDS)) {
+                LambdaQueryWrapper<UserTeam> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(UserTeam::getUserId, userId);
+                List<UserTeam> userTeamList = userTeamService.list(lambdaQueryWrapper);
+                if (userTeamList.size() >= 5) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "加入队伍上限");
+                }
+                for (UserTeam userTeam : userTeamList) {
+                    if (userTeam.getTeamId().equals(teamId)) {
+                        throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不允许重复加入");
+                    }
+                }
 
-        LambdaQueryWrapper<UserTeam> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(UserTeam::getUserId,userId);
-        List<UserTeam> userTeamList = userTeamService.list(lambdaQueryWrapper);
-        if (userTeamList.size() >=5){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"加入队伍上限");
-        }
-        for (UserTeam userTeam : userTeamList) {
-            if (userTeam.getTeamId().equals(teamId)){
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"不允许重复加入");
+                //新增队伍用户关系信息
+                UserTeam userTeam = new UserTeam();
+                BeanUtils.copyProperties(teamJoinRequest, userTeam);
+                userTeam.setUserId(userId);
+                userTeam.setJoinTime(new Date());
+                return userTeamService.save(userTeam);
+             }
+            }
+        } catch (Exception e){
+            log.error("joinTeam error", e);
+            return false;
+        }finally {
+            if (lock.isHeldByCurrentThread()){
+                //判断是当前线程获取的锁，保证只释放自己的锁
+                log.info("unLock: " + Thread.currentThread().getId());
+                lock.unlock();
             }
         }
-
-        //新增队伍用户关系信息
-        UserTeam userTeam = new UserTeam();
-        BeanUtils.copyProperties(teamJoinRequest,userTeam);
-        userTeam.setUserId(userId);
-        userTeam.setJoinTime(new Date());
-
-        return userTeamService.save(userTeam);
     }
 
     /**

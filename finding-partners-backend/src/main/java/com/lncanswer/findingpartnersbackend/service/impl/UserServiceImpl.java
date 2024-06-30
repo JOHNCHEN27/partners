@@ -4,6 +4,7 @@ import java.util.*;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -11,14 +12,17 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.lncanswer.findingpartnersbackend.common.BaseResponse;
 import com.lncanswer.findingpartnersbackend.common.ErrorCode;
 import com.lncanswer.findingpartnersbackend.constant.MinioConstant;
 import com.lncanswer.findingpartnersbackend.constant.RedisConstant;
 import com.lncanswer.findingpartnersbackend.exception.BusinessException;
 import com.lncanswer.findingpartnersbackend.model.domain.User;
 import com.lncanswer.findingpartnersbackend.model.domain.dto.UserDTO;
+import com.lncanswer.findingpartnersbackend.model.domain.vo.UserVO;
 import com.lncanswer.findingpartnersbackend.service.UserService;
 import com.lncanswer.findingpartnersbackend.mapper.UserMapper;
+import com.lncanswer.findingpartnersbackend.utils.AlgorithmUtils;
 import com.lncanswer.findingpartnersbackend.utils.RegexUtils;
 import com.lncanswer.findingpartnersbackend.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +33,9 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.Option;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -285,7 +287,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         Object attribute = request.getSession().getAttribute("token");
         if (attribute == null){
-            return null;
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         String token = (String) attribute;
         if (token.isEmpty()){
@@ -340,6 +342,63 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return false;
         }
         return true;
+    }
+
+    /**
+     * 获取最匹配的用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public List<User> matchUsers(long num, UserDTO loginUser) {
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id", "tags");
+        queryWrapper.isNotNull("tags");
+        List<User> userList = this.list(queryWrapper);
+        String tags = loginUser.getTags();
+        Gson gson = new Gson();
+        List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {
+        }.getType());
+        // 用户列表的下标 => 相似度
+        List<Pair<User, Long>> list = new ArrayList<>();
+        // 依次计算所有用户和当前用户的相似度
+        for (int i = 0; i < userList.size(); i++) {
+            User user = userList.get(i);
+            String userTags = user.getTags();
+            // 无标签或者为当前用户自己
+            if (StringUtils.isBlank(userTags) || user.getId() == loginUser.getId()) {
+                continue;
+            }
+            List<String> userTagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
+            }.getType());
+            // 计算分数
+            long distance = AlgorithmUtils.minDistance(tagList, userTagList);
+            list.add(new Pair<>(user, distance));
+        }
+        // 按编辑距离由小到大排序
+        List<Pair<User, Long>> topUserPairList = list.stream()
+                .sorted((a, b) -> (int) (a.getValue() - b.getValue()))
+                .limit(num)
+                .collect(Collectors.toList());
+        // 原本顺序的 userId 列表
+        List<Long> userIdList = topUserPairList.stream().map(pair -> pair.getKey().getId()).collect(Collectors.toList());
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.in("id", userIdList);
+        // 1, 3, 2
+        // User1、User2、User3
+        // 1 => User1, 2 => User2, 3 => User3
+        Map<Long, List<User>> userIdUserListMap = this.list(userQueryWrapper)
+                .stream()
+                .map(this::safetyUser)
+                .collect(Collectors.groupingBy(User::getId));
+        List<User> finalUserList = new ArrayList<>();
+        for (Long userId : userIdList) {
+            finalUserList.add(userIdUserListMap.get(userId).get(0));
+        }
+        return finalUserList;
+
     }
 
     /**

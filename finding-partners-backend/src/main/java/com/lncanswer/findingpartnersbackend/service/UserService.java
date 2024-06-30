@@ -1,9 +1,11 @@
 package com.lncanswer.findingpartnersbackend.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lncanswer.findingpartnersbackend.common.BaseResponse;
 import com.lncanswer.findingpartnersbackend.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lncanswer.findingpartnersbackend.model.domain.dto.UserDTO;
+import com.lncanswer.findingpartnersbackend.model.domain.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -91,4 +93,12 @@ public interface UserService extends IService<User> {
      * @return boolean
      */
     boolean isAdmin(HttpServletRequest request);
+
+    /**
+     * 获取最匹配的用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    List<User> matchUsers(long num, UserDTO loginUser);
 }

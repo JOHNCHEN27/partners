@@ -71,6 +71,17 @@ public class TeamUserVO implements Serializable {
      */
    UserVO userList;
 
+    /**
+     * 是否已加入队伍
+     */
+    private boolean hasJoin = false;
+
+    /**
+     * 已加入的用户数
+     */
+    private Integer hasJoinNum;
+
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

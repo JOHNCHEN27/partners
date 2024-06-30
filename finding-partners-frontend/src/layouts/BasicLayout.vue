@@ -25,7 +25,7 @@ import {ref} from "vue";
 import routes from "../config/route";
 
 const router = useRouter();
-const DEFAULT_TITLE = '伙伴匹配';
+const DEFAULT_TITLE = '学习搭子';
 const title = ref(DEFAULT_TITLE);
 
 /**

@@ -10,7 +10,9 @@ import com.lncanswer.findingpartnersbackend.model.domain.User;
 import com.lncanswer.findingpartnersbackend.model.domain.dto.UserDTO;
 import com.lncanswer.findingpartnersbackend.model.domain.request.UserLoginRequest;
 import com.lncanswer.findingpartnersbackend.model.domain.request.UserRegisterRequest;
+import com.lncanswer.findingpartnersbackend.model.domain.vo.UserVO;
 import com.lncanswer.findingpartnersbackend.service.UserService;
+import com.lncanswer.findingpartnersbackend.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -193,5 +195,22 @@ public class UserController {
         //返回token
         response.setHeader("authorization",token);
         return  ResultUtils.success(token);
+    }
+
+    /**
+     *  获取最匹配的用户
+     * @param num
+     * @return
+     */
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num){
+        if (num <=0 || num > 20){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        UserDTO user = UserHolder.getUser();
+        if (user == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        return ResultUtils.success(userService.matchUsers(num,user));
     }
 }

@@ -7,8 +7,6 @@ spring:
     password: rootlnc
     username: root
     driver-class-name: com.mysql.cj.jdbc.Driver
-  session: #session 一天失效
-    timeout: 86400
   redis:
       host: 47.113.185.5
       port: 6379
