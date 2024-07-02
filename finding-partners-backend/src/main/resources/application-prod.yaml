@@ -16,3 +16,13 @@ spring:
           max-idle: 8
           max-wait: 100ms
           min-idle: 0
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+    session:
+      cookie:
+#        same-site: None
+#        secure: true  #是否仅仅在https的链接下，才提交cookie
+#        http-only: true  #是否允许js读取cookie
+        domain: lncanswer.cn #开发环境下设置domain为服务器域名

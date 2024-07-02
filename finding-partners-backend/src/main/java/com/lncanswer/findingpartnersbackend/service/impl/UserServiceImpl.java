@@ -284,6 +284,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 //        if (user == null){
 //            return null;
 //        }
+        log.info("url = {}",request.getRequestURI());
+        if (request.getRequestURI().equals("/api/user/recommend") ||request.getRequestURI().equals("/api/team/list")){
+            return null;
+        }
 
         Object attribute = request.getSession().getAttribute("token");
         if (attribute == null){
@@ -484,7 +488,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public Page<User> getRecommendUsers(long pageSize,long pageNum,HttpServletRequest request) {
         //获取当前登录用户
         User currentUser = getCurrentUser(request);
-        if (currentUser == null){
+        if (currentUser == null ){
             //用户未登录，展示主页推荐内容，优先查询缓存
             return getRecommend(pageSize, pageNum, PARTNERS_RECOMMEND_DEFAULT_KEY);
         }
@@ -515,6 +519,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setUserStatus(user.getUserStatus());
         safetyUser.setCreateTime(user.getCreateTime());
         safetyUser.setUserRole(user.getUserRole());
+        safetyUser.setTags(user.getTags());
+        safetyUser.setProfile(user.getProfile());
         return safetyUser;
     }
 

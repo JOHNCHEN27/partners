@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lncanswer.findingpartnersbackend.model.domain.User;
 import com.lncanswer.findingpartnersbackend.service.UserService;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
-import io.lettuce.core.RedisClient;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -19,7 +17,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.lncanswer.findingpartnersbackend.constant.RedisConstant.PARTNERS_RECOMMEND_KEY;
-import static com.lncanswer.findingpartnersbackend.constant.RedisConstant.PARTNERS_RECOMMEND_KEY_TTL;
 import static com.lncanswer.findingpartnersbackend.constant.RedissonConstant.MAIN_RECOMMEND_DOCACHE_KEY;
 
 /**

@@ -32,9 +32,9 @@ server:
     context-path: /api
     session:
       cookie:
-        same-site: None
-        secure: true  #是否仅仅在https的链接下，才提交cookie
-        http-only: true  #是否允许js读取cookie
+#        same-site: None
+#        secure: true  #是否仅仅在https的链接下，才提交cookie
+#        http-only: true  #是否允许js读取cookie
         domain: localhost
 
 mybatis-plus:

@@ -1535,3 +1535,49 @@ https://cloud.weixin.qq.com/cloudrun/service
 
 
 
+# 总结
+
+1、调试bug时，全局拦截器可能获取不到了request携带的cookie，不能用debug模式启动程序，直接运行程序
+
+2、dockerfile如果拉取基础镜像失败，则单独先拉取 比如 docker pull nginx， 在基于dockerfile构建镜像
+
+3、跨域配置可以在前端nginx部署时配置后端的项目地址，或者在后端跨域配置前端的项目地址，如果前端nginx部署，并且绑定了域名，后端跨域直接配置前端域名
+
+```java
+//后端跨域配置
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+
+
+    //"http://wo.lik.com" 配置的是前端服务的地址，如果绑定了域名直接配置域名
+    //前端服务没有绑定域名，则用前端的项目地址： ip + 端口  如：113.432.5.57:80
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        //允许跨域的路径
+       registry.addMapping("/**")
+               //允许发送cookie
+               .allowCredentials(true)
+               //设置允许跨域请求的域名
+               //当** Credentials为true时，Origin不能为星号，需要为具体的ip地址
+               .allowedOrigins("http://wo.lik.com","http://localhost:3000")
+               //允许跨域的方法
+               .allowedMethods("GET", "POST", "PUT", "DELETE")
+               //跨域允许时间
+               .maxAge(3600);
+    }
+}
+
+```
+
+4、设置顶级域名 与其他子域名可以共享session 在applicaiton.yaml中配置domain
+
+```java
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+    session:
+      cookie:
+        domain: lik.com #开发环境下设置domain为服务器域名 lik.com 其子域名可以共享session
+```
+

@@ -47,6 +47,7 @@ com\lncanswer\findingpartnersbackend\controller\AdminController.class
 com\lncanswer\findingpartnersbackend\model\domain\enums\TeamStatusEnum.class
 com\lncanswer\findingpartnersbackend\model\domain\Tag.class
 com\lncanswer\findingpartnersbackend\constant\RedisConstant.class
+com\lncanswer\findingpartnersbackend\model\domain\request\TeamDeleteRequest.class
 com\lncanswer\findingpartnersbackend\job\PreCacheJob.class
 com\lncanswer\findingpartnersbackend\model\domain\dto\TeamQuery.class
 com\lncanswer\findingpartnersbackend\common\BaseResponse.class

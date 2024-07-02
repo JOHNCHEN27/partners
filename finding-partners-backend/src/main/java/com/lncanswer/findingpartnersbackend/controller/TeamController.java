@@ -11,10 +11,7 @@ import com.lncanswer.findingpartnersbackend.model.domain.User;
 import com.lncanswer.findingpartnersbackend.model.domain.UserTeam;
 import com.lncanswer.findingpartnersbackend.model.domain.dto.TeamQuery;
 import com.lncanswer.findingpartnersbackend.model.domain.dto.UserDTO;
-import com.lncanswer.findingpartnersbackend.model.domain.request.TeamAddRequest;
-import com.lncanswer.findingpartnersbackend.model.domain.request.TeamJoinRequest;
-import com.lncanswer.findingpartnersbackend.model.domain.request.TeamQuitRequest;
-import com.lncanswer.findingpartnersbackend.model.domain.request.TeamUpdateRequest;
+import com.lncanswer.findingpartnersbackend.model.domain.request.*;
 import com.lncanswer.findingpartnersbackend.model.domain.vo.TeamUserVO;
 import com.lncanswer.findingpartnersbackend.service.TeamService;
 import com.lncanswer.findingpartnersbackend.service.UserService;
@@ -23,6 +20,7 @@ import com.lncanswer.findingpartnersbackend.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.builder.BuilderException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,15 +67,15 @@ public class TeamController {
 
     /**
      * 删除队伍
-     * @param teamId 队伍id
+     * @param   teamDeleteRequest
      * @return boolean
      */
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(@RequestBody long teamId){
-        if (teamId <=0){
+    public BaseResponse<Boolean> deleteTeam(@RequestBody TeamDeleteRequest teamDeleteRequest){
+        if (teamDeleteRequest == null || teamDeleteRequest.getId() <=0){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean isSuccess = teamService.deleteTeam(teamId);
+        boolean isSuccess = teamService.deleteTeam( teamDeleteRequest.getId());
         if (!isSuccess){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"删除队伍失败");
         }
@@ -116,7 +114,8 @@ public class TeamController {
         if (teamList == null){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"查询队伍失败");
         }
-        return ResultUtils.success(teamList);
+
+        return isJoinTeamAndTeamNum(teamList);
     }
 
     /**
@@ -146,22 +145,22 @@ public class TeamController {
         List<Long> idList = new ArrayList<>(listMap.keySet());
         teamQuery.setIdList(idList);
         List<TeamUserVO> teamList = teamService.listTeam(teamQuery, true);
-        return ResultUtils.success(teamList);
+        return isJoinTeamAndTeamNum(teamList);
 
     }
 
 
     /**
      * 根据队伍id查询队伍
-     * @param teamId
+     * @param id
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<Team> getTeamById(long teamId){
-        if (teamId <=0){
+    public BaseResponse<Team> getTeamById(long id){
+        if (id <=0){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Team team = teamService.getById(teamId);
+        Team team = teamService.getById(id);
         if (team == null){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"查询队伍失败");
         }
@@ -183,31 +182,7 @@ public class TeamController {
         boolean isAdmin = userService.isAdmin(request);
         List<TeamUserVO> teamList = teamService.listTeam(teamQuery,isAdmin);
         //判断当前用户是否已加入队伍
-        final List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
-        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-        try {
-            UserDTO user = UserHolder.getUser();
-            userTeamQueryWrapper.eq("userId",user.getId());
-            userTeamQueryWrapper.in("teamId",teamIdList);
-            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
-            //已加入队伍id集合
-            Set<Long> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
-            teamList.forEach(team -> {
-                boolean haiJoin = hasJoinTeamIdSet.contains(team.getId());
-                team.setHasJoin(haiJoin);
-            });
-        } catch (Exception e){
-        }
-        //查询加入队伍的用户信息（人数）
-        QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("teamId",teamIdList);
-        List<UserTeam> userTeamList = userTeamService.list(queryWrapper);
-        //队伍 id => 加入这个队伍的用户列表
-        Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getId));
-        teamList.forEach(team -> {
-            team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(),new ArrayList<>()).size());
-        });
-        return  ResultUtils.success(teamList);
+        return isJoinTeamAndTeamNum(teamList);
     }
 
     /**
@@ -255,5 +230,41 @@ public class TeamController {
         }
         boolean result = teamService.quitTeam(teamQuitRequest);
         return ResultUtils.success(result);
+    }
+
+    /**
+     * 判断用户是否已经加入队伍 以及每个队伍的人数
+     * @param teamList  List<TeamUserVO>
+     * @return BaseResponse<List<TeamUserVO>>
+     */
+    private BaseResponse<List<TeamUserVO>> isJoinTeamAndTeamNum(List<TeamUserVO> teamList) {
+        //判断用户是否加入队伍
+        final List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
+        if (teamList.isEmpty() || teamIdList.size() == 0){
+            //直接返回
+            return ResultUtils.success(new ArrayList<>());
+        }
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        try {
+            UserDTO user = UserHolder.getUser();
+            userTeamQueryWrapper.eq("userId",user.getId());
+            userTeamQueryWrapper.in("teamId",teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            //已加入队伍id集合
+            Set<Long> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+            teamList.forEach(team -> {
+                boolean haiJoin = hasJoinTeamIdSet.contains(team.getId());
+                team.setHasJoin(haiJoin);
+            });
+        } catch (Exception e){
+        }
+        //查询加入队伍的用户信息（人数）
+        QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("teamId",teamIdList);
+        List<UserTeam> userTeamList = userTeamService.list(queryWrapper);
+        //队伍 id => 加入这个队伍的用户列表
+        Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+        teamList.forEach(team -> team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(),new ArrayList<>()).size()));
+        return ResultUtils.success(teamList);
     }
 }

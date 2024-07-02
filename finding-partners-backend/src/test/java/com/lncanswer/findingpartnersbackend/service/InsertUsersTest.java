@@ -2,6 +2,7 @@ package com.lncanswer.findingpartnersbackend.service;
 
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lncanswer.findingpartnersbackend.model.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -98,6 +99,24 @@ public class InsertUsersTest {
         }
         CompletableFuture.allOf(futureList.toArray(new CompletableFuture[]{})).join();
         // 20 秒 10 万条
+        stopWatch.stop();
+        System.out.println(stopWatch.getTotalTimeMillis());
+    }
+
+
+
+    /**
+     * 批量删除用户
+     */
+    @Test
+    public void doDeleteUsers() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
+        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(User::getTags,"[]");
+        userService.remove(lambdaQueryWrapper);
+
         stopWatch.stop();
         System.out.println(stopWatch.getTotalTimeMillis());
     }

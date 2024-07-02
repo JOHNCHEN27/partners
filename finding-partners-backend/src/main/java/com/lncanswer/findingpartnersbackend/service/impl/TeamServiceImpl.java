@@ -246,7 +246,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
         TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValues(teamUpdateRequest.getStatus());
         if (statusEnum.equals(TeamStatusEnum.SECRET)){
-            if (StringUtils.isNotBlank(teamUpdateRequest.getPassword())){
+            if (StringUtils.isBlank(teamUpdateRequest.getPassword())){
                 throw new BusinessException(ErrorCode.PARAMS_ERROR,"加密房间必须设置密码");
             }
         }

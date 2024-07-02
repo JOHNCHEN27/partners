@@ -16,6 +16,7 @@ E:\project\AdvancedProject\partner\finding-partners-backend\src\main\java\com\ln
 E:\project\AdvancedProject\partner\finding-partners-backend\src\main\java\com\lncanswer\findingpartnersbackend\config\RedisTemplateConfig.java
 E:\project\AdvancedProject\partner\finding-partners-backend\src\main\java\com\lncanswer\findingpartnersbackend\model\domain\request\TeamQuitRequest.java
 E:\project\AdvancedProject\partner\finding-partners-backend\src\main\java\com\lncanswer\findingpartnersbackend\controller\TeamController.java
+E:\project\AdvancedProject\partner\finding-partners-backend\src\main\java\com\lncanswer\findingpartnersbackend\model\domain\request\TeamDeleteRequest.java
 E:\project\AdvancedProject\partner\finding-partners-backend\src\main\java\com\lncanswer\findingpartnersbackend\mapper\TagMapper.java
 E:\project\AdvancedProject\partner\finding-partners-backend\src\main\java\com\lncanswer\findingpartnersbackend\constant\MinioConstant.java
 E:\project\AdvancedProject\partner\finding-partners-backend\src\main\java\com\lncanswer\findingpartnersbackend\config\MvcConfig.java

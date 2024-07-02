@@ -1,0 +1,29 @@
+#nginx反向代理配置
+#路由转发配置
+    server {
+        listen      80;     #监听到80
+    
+       	gzip on;
+    	gzip_min_length 1k;
+    	gzip_comp_level 9;
+    	gzip_types text/plain text/css text/javascript application/json application/javascript application/x-javascript application/xml;
+    	gzip_vary on;
+    	gzip_disable "MSIE [1-6]\.";
+
+    	root /usr/share/nginx/html;
+    	include /etc/nginx/mime.types;
+
+    
+    	#找到nginx目录下的前端项目文件
+    	location / {
+        try_files $uri /index.html;
+    	}
+    	#nginx反向代理， api开头的路径代理到相应的后端服务
+    	location ^~ /api {
+       	 proxy_set_header Host $host;      #proxy_pass 请求转发地址为本机
+       	 proxy_pass    http://ks.lncanswer.cn:8080;  #ks.lncanswer.cn是域名，8080为后端服务所在的端口号
+        #如果前端后端都用容器部署，且在同一个网络中，那么可以用 http://后端服务容器名 : 容器端口号  来代理到后端项目
+    }
+       
+       
+    }

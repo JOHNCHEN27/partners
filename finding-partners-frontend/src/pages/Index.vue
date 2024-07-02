@@ -40,7 +40,8 @@ const loadData = async () => {
         })
         .catch(function (error) {
           console.error('/user/match error', error);
-          Toast.fail('请求失败');
+          Toast.fail('' +
+              '用户未登录');
         })
   } else {
     // 普通模式，直接分页查询用户
